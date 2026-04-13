@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PALATE — Personal Food Curator</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --ink-3: #777777;
+  --ink-4: #aaaaaa;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.15);
+  --hover: #f7f7f7;
+  --radius: 3px;
+  --radius-lg: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 3rem; height: 56px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 0.5px solid var(--border);
+}
+.nav-logo { font-size: 12px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; }
+.nav-links { display: flex; gap: 2.5rem; }
+.nav-links a { font-size: 12px; color: var(--ink-3); text-decoration: none; letter-spacing: 0.04em; transition: color 0.15s; }
+.nav-links a:hover { color: var(--ink); }
+
+/* HERO */
+.hero { padding: 120px 3rem 80px; border-bottom: 0.5px solid var(--border); max-width: 720px; }
+.hero-eyebrow { font-size: 10px; letter-spacing: 0.18em; color: var(--ink-4); text-transform: uppercase; margin-bottom: 2rem; }
+.hero-h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 300; line-height: 1.05; margin-bottom: 1.75rem; letter-spacing: -0.02em; }
+.hero-h1 strong { font-weight: 500; }
+.hero-desc { font-size: 15px; color: var(--ink-3); max-width: 440px; line-height: 1.8; font-weight: 300; }
+
+/* SECTION */
+section { padding: 72px 3rem; border-bottom: 0.5px solid var(--border); }
+.section-header { display: flex; align-items: baseline; gap: 1.25rem; margin-bottom: 2.5rem; }
+.section-num { font-size: 10px; color: var(--ink-4); letter-spacing: 0.1em; flex-shrink: 0; }
+.section-title { font-size: 26px; font-weight: 300; letter-spacing: -0.01em; }
+.section-meta { font-size: 10px; color: var(--ink-4); letter-spacing: 0.08em; margin-left: auto; flex-shrink: 0; }
+
+/* FILTERS */
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 2rem; }
+.filter-btn {
+  font-family: inherit; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 14px; border: 0.5px solid var(--border-strong); border-radius: 20px;
+  background: transparent; color: var(--ink-3); cursor: pointer; transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+.filter-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* REVIEW GRID */
+.review-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); overflow: hidden;
+}
+.review-card {
+  padding: 1.5rem; border-right: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border);
+  background: #fff; transition: background 0.15s;
+}
+.review-card:hover { background: var(--hover); }
+
+/* PHOTO BLOCK */
+.review-photos {
+  width: 100%; height: 180px; border-radius: var(--radius); margin-bottom: 1.25rem;
+  overflow: hidden; background: #f2f2f2; position: relative; cursor: pointer;
+}
+.review-photos.multi {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px;
+}
+.review-photos.single img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-slot { overflow: hidden; }
+.photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-slot:first-child { grid-row: 1 / 3; }
+.photo-more {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.5); color: #fff; font-size: 11px; font-weight: 500;
+  padding: 3px 8px; border-radius: 20px;
+}
+.photo-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+
+/* REVIEW CARD DETAILS */
+.review-cat { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 5px; }
+.review-name { font-size: 16px; font-weight: 500; margin-bottom: 2px; letter-spacing: -0.01em; }
+.review-loc { font-size: 12px; color: var(--ink-4); margin-bottom: 10px; }
+.review-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.stars { display: flex; gap: 2px; }
+.star-fill { width: 8px; height: 8px; background: var(--ink); clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+.star-empty { width: 8px; height: 8px; background: #ddd; clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+.rating-num { font-size: 11px; color: var(--ink-3); }
+.review-snippet { font-size: 13px; color: var(--ink-3); line-height: 1.65; margin-bottom: 10px; font-weight: 300; }
+.review-price { font-size: 11px; color: var(--ink-4); }
+
+/* LIGHTBOX */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 78vh; object-fit: contain; border-radius: var(--radius); }
+.lb-close { position: absolute; top: 24px; right: 28px; color: #fff; font-size: 22px; cursor: pointer; background: none; border: none; font-family: inherit; line-height: 1; }
+.lb-nav { display: flex; gap: 12px; align-items: center; }
+.lb-nav button { color: rgba(255,255,255,0.65); background: none; border: 0.5px solid rgba(255,255,255,0.2); padding: 5px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.15s; }
+.lb-nav button:hover { color: #fff; border-color: rgba(255,255,255,0.55); }
+.lb-counter { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; min-width: 48px; text-align: center; }
+
+/* UPCOMING */
+.upcoming-list { border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); overflow: hidden; }
+.upcoming-item {
+  display: grid; grid-template-columns: 80px 1fr auto; align-items: center;
+  gap: 2rem; padding: 1.125rem 1.5rem; background: #fff;
+  border-bottom: 0.5px solid var(--border); transition: background 0.15s;
+}
+.upcoming-item:last-child { border-bottom: none; }
+.upcoming-item:hover { background: var(--hover); }
+.up-day { font-size: 28px; font-weight: 300; line-height: 1; letter-spacing: -0.02em; }
+.up-month { font-size: 10px; color: var(--ink-4); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+.up-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.up-addr { font-size: 12px; color: var(--ink-4); }
+.up-status { display: flex; align-items: center; gap: 5px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; }
+.dot { width: 5px; height: 5px; border-radius: 50%; }
+.dot-green { background: #2a7a55; }
+.dot-amber { background: #c08040; }
+
+/* INVEST */
+.invest-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+.invest-number { font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; margin-bottom: 1.25rem; letter-spacing: -0.02em; }
+.invest-desc { font-size: 14px; color: var(--ink-3); line-height: 1.8; margin-bottom: 2rem; font-weight: 300; }
+.invest-criteria { display: grid; grid-template-columns: 1fr 1fr; border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); overflow: hidden; }
+.crit-item { padding: 1.125rem 1.25rem; background: #fff; border-right: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); }
+.crit-item:nth-child(2n) { border-right: none; }
+.crit-item:nth-last-child(-n+2) { border-bottom: none; }
+.crit-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 4px; }
+.crit-val { font-size: 13px; font-weight: 500; }
+
+/* FORM */
+.invest-form { border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); overflow: hidden; }
+.form-header { padding: 1rem 1.25rem; background: var(--ink); color: #fff; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+.form-body { padding: 1.25rem; background: #fff; display: flex; flex-direction: column; gap: 0.875rem; }
+.form-label { display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 4px; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; padding: 9px 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius);
+  background: #fafafa; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 300;
+  outline: none; transition: border-color 0.15s, background 0.15s;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--ink); background: #fff; }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select { appearance: none; cursor: pointer; }
+.form-submit {
+  width: 100%; padding: 11px; background: var(--ink); color: #fff; border: none;
+  border-radius: var(--radius); font-family: inherit; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s;
+}
+.form-submit:hover { opacity: 0.72; }
+.form-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+.form-success { display: none; padding: 12px; background: #f2f8f2; border: 0.5px solid #b5d5b5; border-radius: var(--radius); font-size: 13px; color: #2a5a2a; text-align: center; line-height: 1.6; }
+
+/* FOOTER */
+footer { padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; }
+.footer-logo { font-size: 11px; letter-spacing: 0.2em; color: var(--ink-4); text-transform: uppercase; }
+.footer-note { font-size: 11px; color: var(--ink-4); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 0 1.25rem; }
+  .hero { padding: 96px 1.25rem 56px; }
+  section { padding: 56px 1.25rem; }
+  .invest-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+  .upcoming-item { grid-template-columns: 70px 1fr; }
+  .up-status { display: none; }
+  footer { flex-direction: column; gap: 0.5rem; padding: 1.25rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Palate</div>
+  <div class="nav-links">
+    <a href="#reviews">Reviews</a>
+    <a href="#upcoming">Upcoming</a>
+    <a href="#invest">Invest</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Personal food curator — Jakarta &amp; Bali</div>
+  <h1 class="hero-h1">Places worth<br><strong>your table.</strong></h1>
+  <p class="hero-desc">Every spot here has been visited, ordered, and eaten firsthand. No PR invite, no gifted meal — just honest takes from someone who eats a lot.</p>
+</div>
+
+<section id="reviews">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">Reviews</span>
+    <span class="section-meta" id="review-meta"></span>
+  </div>
+  <div class="filter-row" id="filter-row"></div>
+  <div class="review-grid" id="review-grid"></div>
+</section>
+
+<section id="upcoming">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">On the radar</span>
+    <span class="section-meta">Next 7 days</span>
+  </div>
+  <div class="upcoming-list" id="upcoming-list"></div>
+</section>
+
+<section id="invest">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">F&amp;B Investment</span>
+    <span class="section-meta">Partnership model</span>
+  </div>
+  <div class="invest-layout">
+    <div>
+      <div class="invest-number">Up to<br>Rp 50 juta.</div>
+      <p class="invest-desc">Gw bukan VC. Gw partner — ikut taste test, ikut bantu positioning, ikut seneng waktu tempat lo rame. Investment berbasis kemitraan nyata, bukan sekadar modal.</p>
+      <div class="invest-criteria">
+        <div class="crit-item"><div class="crit-label">Ticket size</div><div class="crit-val">Rp 10 — 50 juta</div></div>
+        <div class="crit-item"><div class="crit-label">Model</div><div class="crit-val">Equity partnership</div></div>
+        <div class="crit-item"><div class="crit-label">Fokus</div><div class="crit-val">F&amp;B concept only</div></div>
+        <div class="crit-item"><div class="crit-label">Area</div><div class="crit-val">Jakarta &amp; Bali</div></div>
+      </div>
+    </div>
+    <div class="invest-form">
+      <div class="form-header">Submit a proposal</div>
+      <div class="form-body">
+        <div><label class="form-label">Nama / Brand</label><input type="text" class="form-input" id="f-name" placeholder="Nama lo atau nama bisnis"></div>
+        <div>
+          <label class="form-label">Tipe Konsep</label>
+          <select class="form-select" id="f-type">
+            <option value="">Pilih kategori</option>
+            <option>Street food / Gerobak</option>
+            <option>Casual dining</option>
+            <option>Kafe / Coffee shop</option>
+            <option>Cloud kitchen</option>
+            <option>Fine dining</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+        <div><label class="form-label">Investment yang dibutuhkan</label><input type="text" class="form-input" id="f-amount" placeholder="Contoh: Rp 25.000.000"></div>
+        <div><label class="form-label">Ceritain konsepnya</label><textarea class="form-textarea" id="f-desc" placeholder="Apa yang bikin bisnis lo beda? Udah ada proof of concept?"></textarea></div>
+        <div><label class="form-label">Kontak (WA / Instagram / Email)</label><input type="text" class="form-input" id="f-contact" placeholder="Cara gw bisa reach lo"></div>
+        <button class="form-submit" id="f-btn" onclick="submitProposal()">Kirim Proposal →</button>
+        <div class="form-success" id="f-success">Proposal lo sudah masuk! Gw akan reach out dalam 3–5 hari kerja.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Palate</div>
+  <div class="footer-note">Updated weekly · Jakarta Selatan, Indonesia</div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="lbOutside(event)">
+  <button class="lb-close" onclick="closeLb()">&#x2715;</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-nav">
+    <button onclick="lbPrev()">&#8592;</button>
+    <span class="lb-counter" id="lb-counter"></span>
+    <button onclick="lbNext()">&#8594;</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA — Edit di sini untuk update konten website
+
+   Cara tambah foto:
+   1. Upload foto ke https://imgbb.com (gratis, pilih "Direct link")
+   2. Copy link yang ada akhiran .jpg/.png
+   3. Paste ke dalam array photos: ["link1", "link2", ...]
+   Bisa upload hingga beberapa foto per resto — tampil sebagai galeri grid.
+
+   Cara tambah review baru: copy satu blok {...} dan paste di bawahnya,
+   pisahkan dengan koma, lalu isi datanya.
+═══════════════════════════════════════════════════════════════════════════ */
+
+const REVIEWS = [
+  {
+    name: "Aragawa Jakarta",
+    category: "Steakhouse",
+    location: "Menteng, Jakarta Pusat",
+    rating: 5,
+    snippet: "Wagyu A5 terbaik yang pernah gw makan di Jakarta. Worth every rupiah untuk special occasion.",
+    price: "Rp 800rb – 2jt / orang",
+    photos: []
+    // Contoh isi foto: photos: ["https://i.ibb.co/abc/foto-makanan.jpg", "https://i.ibb.co/xyz/foto-resto.jpg"]
+  },
+  {
+    name: "Pochajjang PIK",
+    category: "Korean BBQ",
+    location: "PIK, Jakarta Utara",
+    rating: 4,
+    snippet: "Daging segar, banchan unlimited, dan grill sendiri yang seru. Antre panjang tapi worth it.",
+    price: "Rp 200rb – 350rb / orang",
+    photos: []
+  },
+  {
+    name: "Enoshima",
+    category: "Izakaya",
+    location: "Kemang, Jakarta Selatan",
+    rating: 5,
+    snippet: "Sake terbaik di Jakarta versi gw. Skewer udang krispi + suasana yang bikin betah sampai tutup.",
+    price: "Rp 300rb – 500rb / orang",
+    photos: []
+  },
+  {
+    name: "Warung Bu Mi",
+    category: "Street Food",
+    location: "Ubud, Bali",
+    rating: 4,
+    snippet: "Nasi campur Bali yang autentik. Babi guling-nya crispy sempurna, sambal matah segar banget.",
+    price: "Rp 35rb – 60rb / orang",
+    photos: []
+  },
+  {
+    name: "El Asador",
+    category: "Steakhouse",
+    location: "Seminyak, Bali",
+    rating: 4,
+    snippet: "Argentine-style open fire grill. Ribeye juicy, chimichurri homemade, view garden yang enak.",
+    price: "Rp 400rb – 700rb / orang",
+    photos: []
+  },
+  {
+    name: "Hoshigaoka",
+    category: "Izakaya",
+    location: "Sudirman, Jakarta Selatan",
+    rating: 5,
+    snippet: "Hidden gem izakaya di basement. Sashimi segar, highball balanced, harga masuk akal.",
+    price: "Rp 250rb – 450rb / orang",
+    photos: []
+  }
+];
+
+const UPCOMING = [
+  { day: "14", month: "Apr", name: "Burnt Ends SCBD", address: "Jl. Sudirman, Jakarta Selatan", status: "confirmed" },
+  { day: "15", month: "Apr", name: "Gyu-Kaku Senayan", address: "Plaza Senayan, Jakarta Pusat", status: "confirmed" },
+  { day: "17", month: "Apr", name: "Merah Putih Bali", address: "Jl. Petitenget, Seminyak", status: "tentative" },
+  { day: "18", month: "Apr", name: "Warung Mak Beng", address: "Jl. Hang Tuah, Sanur", status: "tentative" }
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORMSPREE: Form sudah terhubung ke colindadhi@gmail.com via endpoint xrerzngo.
+   DOWNLOAD EXCEL: Login ke formspree.io → tab "Submissions" → klik "Export" → CSV → buka di Excel.
+═══════════════════════════════════════════════════════════════════════════ */
+const FORMSPREE_ID = 'xrerzngo';
+
+/* ─── STARS ───────────────────────────────────────────────────────────────── */
+function renderStars(n) {
+  return Array.from({length:5}, (_,i) =>
+    `<div class="${i < n ? 'star-fill' : 'star-empty'}"></div>`
+  ).join('');
+}
+
+/* ─── LIGHTBOX ────────────────────────────────────────────────────────────── */
+let lbPhotos = [], lbIdx = 0;
+function openLb(photos, idx) {
+  lbPhotos = photos; lbIdx = idx;
+  updateLb();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function updateLb() {
+  document.getElementById('lb-img').src = lbPhotos[lbIdx];
+  document.getElementById('lb-counter').textContent = (lbIdx+1) + ' / ' + lbPhotos.length;
+}
+function closeLb() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+function lbOutside(e) { if (e.target === document.getElementById('lightbox')) closeLb(); }
+function lbNext() { lbIdx = (lbIdx+1) % lbPhotos.length; updateLb(); }
+function lbPrev() { lbIdx = (lbIdx-1+lbPhotos.length) % lbPhotos.length; updateLb(); }
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key==='ArrowRight') lbNext();
+  if (e.key==='ArrowLeft') lbPrev();
+  if (e.key==='Escape') closeLb();
+});
+
+/* ─── PHOTO BLOCK ─────────────────────────────────────────────────────────── */
+const CAT_EMOJI = {Steakhouse:'🥩','Korean BBQ':'🔥',Izakaya:'🍶','Street Food':'🍛'};
+
+function photoBlock(photos, cat) {
+  if (!photos || photos.length === 0) {
+    return `<div class="review-photos single" style="cursor:default">
+      <div class="photo-placeholder">${CAT_EMOJI[cat]||'🍽'}</div>
+    </div>`;
+  }
+  const shown = photos.slice(0, 3);
+  const extra = photos.length - 3;
+  const photosJson = JSON.stringify(photos).replace(/"/g,'&quot;');
+  if (photos.length === 1) {
+    return `<div class="review-photos single" onclick="openLb(JSON.parse(this.dataset.p),0)" data-p="${photosJson}">
+      <img src="${shown[0]}" alt="" loading="lazy">
+    </div>`;
+  }
+  const slots = shown.map((p,i) =>
+    `<div class="photo-slot" onclick="openLb(JSON.parse(document.querySelector('[data-pid=&quot;${cat}&quot;]').dataset.p),${i})">
+      <img src="${p}" alt="" loading="lazy">
+    </div>`
+  ).join('');
+  const more = extra > 0 ? `<div class="photo-more">+${extra}</div>` : '';
+  return `<div class="review-photos multi" data-pid="${cat}" data-p="${photosJson}" onclick="openLb(JSON.parse(this.dataset.p),0)" style="cursor:pointer">
+    ${slots}${more}
+  </div>`;
+}
+
+/* ─── RENDER REVIEWS ──────────────────────────────────────────────────────── */
+function renderReviews(data) {
+  document.getElementById('review-meta').textContent = data.length + ' places';
+  document.getElementById('review-grid').innerHTML = data.map(r => `
+    <div class="review-card">
+      ${photoBlock(r.photos, r.category)}
+      <div class="review-cat">${r.category}</div>
+      <div class="review-name">${r.name}</div>
+      <div class="review-loc">${r.location}</div>
+      <div class="review-rating"><div class="stars">${renderStars(r.rating)}</div><span class="rating-num">${r.rating}.0</span></div>
+      <div class="review-snippet">${r.snippet}</div>
+      <div class="review-price">${r.price}</div>
+    </div>
+  `).join('');
+}
+
+/* ─── FILTERS ─────────────────────────────────────────────────────────────── */
+function buildFilters() {
+  const cats = ['All', ...new Set(REVIEWS.map(r => r.category))];
+  document.getElementById('filter-row').innerHTML = cats.map((c,i) =>
+    `<button class="filter-btn${i===0?' active':''}" onclick="filterReviews('${c}',this)">${c}</button>`
+  ).join('');
+}
+function filterReviews(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviews(cat==='All' ? REVIEWS : REVIEWS.filter(r => r.category===cat));
+}
+
+/* ─── UPCOMING ────────────────────────────────────────────────────────────── */
+function renderUpcoming() {
+  document.getElementById('upcoming-list').innerHTML = UPCOMING.map(u => `
+    <div class="upcoming-item">
+      <div><div class="up-day">${u.day}</div><div class="up-month">${u.month}</div></div>
+      <div><div class="up-name">${u.name}</div><div class="up-addr">${u.address}</div></div>
+      <div class="up-status"><div class="dot ${u.status==='confirmed'?'dot-green':'dot-amber'}"></div>${u.status}</div>
+    </div>
+  `).join('');
+}
+
+/* ─── SUBMIT PROPOSAL ─────────────────────────────────────────────────────── */
+async function submitProposal() {
+  const vals = {
+    name: document.getElementById('f-name').value.trim(),
+    type: document.getElementById('f-type').value,
+    amount: document.getElementById('f-amount').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    contact: document.getElementById('f-contact').value.trim()
+  };
+  if (Object.values(vals).some(v => !v)) { alert('Harap isi semua field ya.'); return; }
+
+  const btn = document.getElementById('f-btn');
+  btn.disabled = true; btn.textContent = 'Mengirim...';
+
+  try {
+    const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: `[PALATE] Proposal: ${vals.name}`,
+        Nama: vals.name, 'Tipe Konsep': vals.type,
+        'Investment': vals.amount, 'Deskripsi': vals.desc, 'Kontak': vals.contact
+      })
+    });
+    if (res.ok) {
+      document.getElementById('f-success').style.display = 'block';
+      btn.style.display = 'none';
+    } else { throw new Error(); }
+  } catch {
+    alert('Gagal mengirim. Pastikan Formspree ID sudah diisi dengan benar.');
+    btn.disabled = false; btn.textContent = 'Kirim Proposal →';
+  }
+}
+
+/* ─── INIT ────────────────────────────────────────────────────────────────── */
+buildFilters();
+renderReviews(REVIEWS);
+renderUpcoming();
+</script>
+</body>
+</html>
